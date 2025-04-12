@@ -40,3 +40,16 @@ CREATE TABLE IF NOT EXISTS exercicios (
   criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (disciplina_id) REFERENCES disciplinas(id)
 );
+CREATE TABLE IF NOT EXISTS avaliacao_aula (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_usuario INT NOT NULL,
+  id_cronograma INT NOT NULL,
+  Foreign Key (id_cronograma) REFERENCES cro()
+)
+CREATE Table if NOT EXISTS cronograma(
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  disciplina_id INT NOT NULL,
+  nome_aula VARCHAR(255) NOT NULL,
+  `data` DATE NOT NULL,
+  FOREIGN KEY (disciplina_id) REFERENCES disciplinas(id)
+)

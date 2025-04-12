@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model avaliacao_aula {
+  id            Int        @id @default(autoincrement())
+  id_usuario    Int
+  id_cronograma Int
+  cronograma    cronograma @relation(fields: [id_cronograma], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "avaliacao_aula_ibfk_1")
+
+  @@index([id_cronograma], map: "id_cronograma")
+}
+
+model cronograma {
+  id             Int              @id @default(autoincrement())
+  disciplina_id  Int
+  nome_aula      String           @db.VarChar(255)
+  data           DateTime         @db.Date
+  avaliacao_aula avaliacao_aula[]
+  disciplinas    disciplinas      @relation(fields: [disciplina_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cronograma_ibfk_1")
+
+  @@index([disciplina_id], map: "disciplina_id")
+}
+
+model cursos {
+  id               Int                @id @default(autoincrement())
+  nome             String             @db.VarChar(255)
+  descricao        String?            @db.Text
+  disciplina_curso disciplina_curso[]
+}
+
+model disciplina_curso {
+  id            Int         @id @default(autoincrement())
+  curso_id      Int
+  disciplina_id Int
+  cursos        cursos      @relation(fields: [curso_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "disciplina_curso_ibfk_1")
+  disciplinas   disciplinas @relation(fields: [disciplina_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "disciplina_curso_ibfk_2")
+
+  @@index([curso_id], map: "curso_id")
+  @@index([disciplina_id], map: "disciplina_id")
+}
+
+model disciplinas {
+  id               Int                @id @default(autoincrement())
+  nome             String             @db.VarChar(255)
+  descricao        String?            @db.Text
+  cronograma       cronograma[]
+  disciplina_curso disciplina_curso[]
+  exercicios       exercicios[]
+}
+
+model exercicios {
+  id            Int         @id @default(autoincrement())
+  titulo        String      @db.VarChar(255)
+  enunciado     String      @db.Text
+  disciplina_id Int
+  criado_em     DateTime?   @default(now()) @db.DateTime(0)
+  disciplinas   disciplinas @relation(fields: [disciplina_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "exercicios_ibfk_1")
+
+  @@index([disciplina_id], map: "disciplina_id")
+}
+
+model usuarios {
+  id        Int           @id @default(autoincrement())
+  nome      String        @db.VarChar(255)
+  email     String        @unique(map: "email") @db.VarChar(255)
+  senha     String        @db.VarChar(255)
+  tipo      usuarios_tipo
+  criado_em DateTime?     @default(now()) @db.DateTime(0)
+}
+
+enum usuarios_tipo {
+  aluno
+  professor
+}
