@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import router from './src/routes/Routes_Crud.js';
+import router from './routes.js';
 import { PrismaClient } from '@prisma/client';
 
 const app = express(); // Inicializa o Express
