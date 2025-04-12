@@ -1,0 +1,25 @@
+{
+  "name": "hacaton",
+  "version": "1.0.0",
+  "description": "Projeto da Fatec",
+  "main": "app.js",
+  "scripts": {
+    "test": "npm run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ChacaraKairo/Hacathon.git"
+  },
+  "author": "Kairo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ChacaraKairo/Hacathon/issues"
+  },
+  "homepage": "https://github.com/ChacaraKairo/Hacathon#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "nodemon": "^3.1.9",
+    "sqlite3": "^5.1.7"
+  }
+}
