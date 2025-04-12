@@ -24,3 +24,9 @@ Gerar relatórios que auxiliem a coordenação do curso na melhoria da grade e d
 📥 Exportação de dados para uso institucional.
 
 ### 🧱 Tecnologias Utilizadas
+nodemon
+express
+prisma
+cors
+dotenv
+sqlite
