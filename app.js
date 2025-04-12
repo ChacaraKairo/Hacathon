@@ -1,72 +1,58 @@
-// Importa bibliotecas principais para construir a API
-import express from 'express';         // Framework para rotas e servidor HTTP
-import cors from 'cors';               // Middleware que libera requisições de outros domínios
-import sqlite3 from 'sqlite3';         // Biblioteca para manipular banco de dados SQLite
-import { fileURLToPath } from 'url';   // Utilitário para lidar com URLs de arquivos
-import { dirname, resolve } from 'path'; // Utilitários para lidar com caminhos de diretório
+/**
+ * @author Kairo Chácara
+ * @version 1.0
+ * @date 01/04/2025
+ * @description Arquivo principal da aplicação Express com Prisma e MySQL.
+ */
 
-// Cria variáveis de caminho para poder usar __dirname em modo ES module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import express from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
+import router from './src/routes/Routes_Crud.js';
+import { PrismaClient } from '@prisma/client';
 
-// Inicializa o servidor Express
-const app = express();
-const PORT = 3000; // Porta onde o servidor vai rodar
+const app = express(); // Inicializa o Express
+const prisma = new PrismaClient(); // Inicializa o Prisma com MySQL
 
-// Middleware para permitir requisições externas e leitura de JSON no corpo da requisição
-app.use(cors()); // Habilita CORS
-app.use(express.json()); // Permite uso de JSON nas requisições
+// Middlewares
+app.use(cors());
+app.use(morgan('dev'));
+app.use(express.json());
 
-// Configuração do caminho para o arquivo do banco de dados SQLite
-const dbPath = resolve(__dirname, 'database.sqlite');
-
-// Conecta (ou cria) o banco SQLite
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('Erro ao conectar ao banco:', err.message);
-  } else {
-    console.log('Conectado ao banco SQLite!');
+// Rota de health check
+app.get('/api/health', async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`; // Teste de conexão com o MySQL
+    res.status(200).json({
+      status: 'healthy',
+      message: 'API do Marketplace de Hardware está operacional',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0',
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'unhealthy',
+      error: error.message,
+    });
   }
 });
 
-// Rota GET raiz (/) para testar se a API está online
+// Rota principal
 app.get('/', (req, res) => {
-  res.send('API funcionando com ESModules! 🚀');
+  res.send('API está funcionando!');
 });
 
-// Rota GET /usuarios para listar todos os usuários cadastrados no banco
-app.get('/usuarios', (req, res) => {
-  db.all('SELECT * FROM usuarios', [], (err, rows) => {
-    if (err) {
-      res.status(500).json({ erro: err.message }); // Erro na consulta
-    } else {
-      res.json(rows); // Retorna todos os usuários encontrados
-    }
-  });
-});
+// Conecta rotas da aplicação
+app.use('/api', router);
 
-// Rota POST /usuarios para cadastrar um novo usuário no banco
-app.post('/usuarios', (req, res) => {
-  const { nome, email, senha, tipo } = req.body;
-
-  // Verifica se todos os campos obrigatórios foram preenchidos
-  if (!nome || !email || !senha || !tipo) {
-    return res.status(400).json({ erro: 'Preencha todos os campos!' });
+// Inicia o servidor
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, async () => {
+  try {
+    await prisma.$connect();
+    console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+    console.log('✅ Banco de dados conectado com sucesso!');
+  } catch (error) {
+    console.error('❌ Erro ao conectar com o banco de dados:', error.message);
   }
-
-  // Insere o novo usuário no banco
-  const query = `INSERT INTO usuarios (nome, email, senha, tipo) VALUES (?, ?, ?, ?)`;
-  db.run(query, [nome, email, senha, tipo], function (err) {
-    if (err) {
-      res.status(500).json({ erro: err.message }); // Erro ao inserir
-    } else {
-      // Retorna os dados do usuário recém-cadastrado (sem a senha)
-      res.status(201).json({ id: this.lastID, nome, email, tipo });
-    }
-  });
-});
-
-// Inicia o servidor e escuta na porta definida
-app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
