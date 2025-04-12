@@ -18,9 +18,13 @@
   },
   "homepage": "https://github.com/ChacaraKairo/Hacathon#readme",
   "dependencies": {
+    "@prisma/client": "^6.6.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "nodemon": "^3.1.9",
     "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "prisma": "^6.6.0"
   }
 }

@@ -1,10 +1,3 @@
-/**
- * @author Kairo Chácara
- * @version 1.0
- * @date 01/04/2025
- * @description Arquivo principal da aplicação Express com Prisma e MySQL.
- */
-
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
