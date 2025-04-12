@@ -25,8 +25,13 @@ Gerar relatórios que auxiliem a coordenação do curso na melhoria da grade e d
 
 ### 🧱 Tecnologias Utilizadas
 nodemon
+
 express
+
 prisma
+
 cors
+
 dotenv
-sqlite
+
+MySQL
