@@ -1,82 +1,36 @@
 import { PrismaClient } from '@prisma/client';
+import { notas } from '@prisma/client/sql';
 
 const prisma = new PrismaClient();
 
-/**
- * Cria um novo registro em uma entidade.
- * @param {Object} data - Dados a serem inseridos.
- * @param {string} entidade - Nome da tabela no Prisma.
- * @returns {Promise<Object>} Objeto criado.
- */
-async function create(data, entidade) {
-  try {
-    return await prisma[entidade].create({ data });
-  } catch (error) {
-    throw new Error(`Erro ao criar em ${entidade}: ${error.message}`);
-  }
+async function media(id_cronograma) {
+  // Recupera as notas associadas ao cronograma
+  const resultados = await prisma.$queryRawTyped(notas(id_cronograma));
+
+  // Extrai os valores das notas (supondo que venha um array de objetos)
+  const listaNotas = resultados.map(item => item.nota); // substitua "nota" pelo nome real da coluna
+
+  if (listaNotas.length === 0) return 0;
+
+  // Função para calcular a média
+  const calcularMedia = (arr) => arr.reduce((acc, val) => acc + val, 0) / arr.length;
+
+  // Média inicial
+  const mediaNotas = calcularMedia(listaNotas);
+
+  // Função para calcular o desvio padrão
+  const calcularDesvioPadrao = (arr, media) => {
+    const somaQuadrados = arr.reduce((acc, val) => acc + Math.pow(val - media, 2), 0);
+    return Math.sqrt(somaQuadrados / arr.length);
+  };
+
+  const desvioPadrao = calcularDesvioPadrao(listaNotas, mediaNotas);
+
+  // Filtra as notas dentro de 1 desvio padrão da média
+  const notasFiltradas = listaNotas.filter(nota => Math.abs(nota - mediaNotas) <= desvioPadrao);
+
+  // Retorna a nova média das notas filtradas
+  return calcularMedia(notasFiltradas);
 }
 
-/**
- * Busca todos os registros de uma entidade.
- * @param {string} entidade - Nome da tabela no Prisma.
- * @returns {Promise<Array>} Lista de registros.
- */
-async function readAll(entidade) {
-  try {
-    return await prisma[entidade].findMany();
-  } catch (error) {
-    throw new Error(`Erro ao buscar todos em ${entidade}: ${error.message}`);
-  }
-}
-
-/**
- * Busca um registro por ID.
- * @param {number} id - ID do registro.
- * @param {string} entidade - Nome da tabela no Prisma.
- * @returns {Promise<Object|null>} Registro encontrado ou null.
- */
-async function readById(id, entidade) {
-  try {
-    return await prisma[entidade].findUnique({ where: { id: Number(id) } });
-  } catch (error) {
-    throw new Error(`Erro ao buscar por ID em ${entidade}: ${error.message}`);
-  }
-}
-
-/**
- * Atualiza um registro pelo ID.
- * @param {number} id - ID do registro.
- * @param {Object} data - Dados para atualizar.
- * @param {string} entidade - Nome da tabela no Prisma.
- * @returns {Promise<Object>} Registro atualizado.
- */
-async function update(id, data, entidade) {
-  try {
-    return await prisma[entidade].update({ where: { id: Number(id) }, data });
-  } catch (error) {
-    throw new Error(`Erro ao atualizar em ${entidade}: ${error.message}`);
-  }
-}
-
-/**
- * Exclui um registro pelo ID.
- * @param {number} id - ID do registro.
- * @param {string} entidade - Nome da tabela no Prisma.
- * @returns {Promise<Object>} Registro excluído.
- */
-async function deleteById(id, entidade) {
-  try {
-    return await prisma[entidade].delete({ where: { id: Number(id) } });
-  } catch (error) {
-    throw new Error(`Erro ao excluir em ${entidade}: ${error.message}`);
-  }
-}
-
-export {
-  prisma,
-  create,
-  readAll,
-  readById,
-  update,
-  deleteById
-};
+export { media };

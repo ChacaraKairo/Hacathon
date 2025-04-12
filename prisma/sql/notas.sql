@@ -1,0 +1,1 @@
+SELECT nota from avaliacao_aula WHERE id_cronograma = ?;
